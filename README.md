@@ -12,11 +12,11 @@ Built as a portfolio project. The demo is pre-loaded with sample data from a rea
 
 The dashboard is a read-only view — you never fill out a form or edit a field directly. All interaction goes through the **AI Assistant**:
 
-- *"Add Acme Trucking in Azle TX, $25/hr, status Applied, weekly pay, weekends off, contact is Dan at 555-1234"*
-- *"Mark Hirschbach as Call Recruiter and note that Lauren called — I'm first on the waiting list"*
+- *"Add Northside Tech in Austin TX, $95K/yr, status Applied, remote-friendly, contact is Sarah at 555-1234"*
+- *"Mark Acme Corp as Call Recruiter and note they reached out — interview scheduled for next week"*
 - *"What jobs am I still waiting to hear back from?"*
-- *"Reject Penn Tank Lines — it's owner-operator only, I need a company driver seat"*
-- *"Update my profile — I have my Hazmat and Tanker endorsements and I'm targeting $80K+"*
+- *"Reject the Globex position — the salary is too low and it's fully on-site"*
+- *"Update my profile — I have 5 years of experience and I'm targeting $90K+"*
 
 The AI reads and writes `jobs.json` directly. The table re-renders live after every change.
 
