@@ -23,6 +23,7 @@ app.add_middleware(
 
 BASE_DIR = Path(__file__).parent
 DATA_FILE = BASE_DIR / "data" / "jobs.json"
+PROFILE_FILE = BASE_DIR / "data" / "profile.json"
 FRONTEND_DIR = BASE_DIR / "frontend"
 
 
@@ -37,6 +38,70 @@ def save_jobs(data: dict) -> None:
     data["lastUpdated"] = date.today().isoformat()
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=2)
+
+
+def load_profile() -> dict:
+    if not PROFILE_FILE.exists():
+        return {"profile": {}}
+    with open(PROFILE_FILE) as f:
+        return json.load(f)
+
+
+def save_profile(data: dict) -> None:
+    data["lastUpdated"] = date.today().isoformat()
+    with open(PROFILE_FILE, "w") as f:
+        json.dump(data, f, indent=2)
+
+
+def build_system_prompt() -> str:
+    base = (
+        "You are an AI assistant for a job application tracker. "
+        "You help users manage and query job applications across any industry.\n\n"
+        "Valid statuses: Not Applied, Applied, Call Recruiter, Interview, Rejected\n\n"
+        "## When a user pastes a job listing\n"
+        "Extract as many fields as possible and call add_job (or update_job if it already exists):\n"
+        "- company, title, location, payRange, schedule (hours/shift/remote/hybrid), payCycle,\n"
+        "  requirements (degree, experience, certifications, skills, etc.),\n"
+        "  benefits (bonus, equity, health, PTO, etc.),\n"
+        "  recruiter (name + contact if listed), applyUrl, notes (anything else useful).\n"
+        "- Use the 'details' object for any additional industry-specific fields that don't fit\n"
+        "  the standard fields above. Keys should be concise labels, values short strings.\n"
+        "  Examples — trucking: {\"Equipment\": \"Flatbed\", \"Endorsements\": \"HazMat, Tanker\"};\n"
+        "  tech: {\"Stack\": \"React / Node.js\", \"Team\": \"Platform\", \"Equity\": \"0.1% options\"};\n"
+        "  healthcare: {\"Shift\": \"Nights\", \"Unit\": \"ICU\", \"Certifications\": \"BLS, ACLS\"}\n"
+        "- Set status to 'Not Applied' unless the user says otherwise.\n"
+        "- Add alerts[] for anything the user should know at a glance:\n"
+        "  - type 'flag' (amber): action needed — e.g. 'Contact recruiter before applying',\n"
+        "    'Certification required — verify you hold it', 'Application deadline approaching'\n"
+        "  - type 'warn' (red): potential blockers — e.g. 'Requires 5 yrs experience — verify you qualify',\n"
+        "    'Contractor role — no benefits', 'Relocation required'\n"
+        "  - type 'info' (blue): helpful highlights — e.g. '$10,000 sign-on bonus',\n"
+        "    'Remote-friendly', 'Internal referral available'\n"
+        "- If a user profile exists, cross-reference it: flag mismatches between the job's\n"
+        "  requirements and the user's qualifications, and highlight strong fits.\n\n"
+        "## User profile\n"
+        "The user can tell you about themselves at any time. When they share background,\n"
+        "qualifications, location, salary targets, or preferences, call update_profile to\n"
+        "save it. This persists across sessions so you always have context.\n\n"
+        "## General guidelines\n"
+        "- Be concise — one or two sentences unless detail is requested.\n"
+        "- When you modify data, briefly confirm what changed.\n"
+        "- Use list_jobs first if you need to find a job by company name\n"
+        "  (IDs are slugs like 'acme-corp-new-york').\n"
+        "- Dates use YYYY-MM-DD format."
+    )
+
+    # Inject user profile if populated
+    try:
+        p = load_profile().get("profile", {})
+        lines = [f"{k}: {v}" for k, v in p.items() if v and v.strip()]
+        if lines:
+            profile_section = "## About the user\n" + "\n".join(lines)
+            base = profile_section + "\n\n" + base
+    except Exception:
+        pass
+
+    return base
 
 
 # ── Claude tools ──────────────────────────────────────────────────────────────
@@ -140,6 +205,17 @@ TOOLS = [
                         "required": ["type", "message"],
                     },
                 },
+                "details": {
+                    "type": "object",
+                    "description": (
+                        "Flexible key-value pairs for any additional industry-specific info "
+                        "that doesn't fit the standard fields. Keys and values are strings. "
+                        "Trucking: {\"Equipment\": \"Flatbed\", \"Endorsements\": \"HazMat, Tanker\"}. "
+                        "Tech: {\"Stack\": \"React / Node.js\", \"Team\": \"Platform\"}. "
+                        "Healthcare: {\"Shift\": \"Nights\", \"Unit\": \"ICU\"}."
+                    ),
+                    "additionalProperties": {"type": "string"},
+                },
                 "notes": {"type": "string"},
             },
             "required": ["id", "company", "title", "location", "status"],
@@ -184,39 +260,57 @@ TOOLS = [
             "required": ["id"],
         },
     },
+    {
+        "name": "get_profile",
+        "description": (
+            "Read the saved user profile — background, qualifications, location, "
+            "salary target, and preferences. Call this if you need context about "
+            "the user to answer a question or evaluate a job fit."
+        ),
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
+        "name": "update_profile",
+        "description": (
+            "Save or update information about the user. Call this whenever the user "
+            "shares background, qualifications, certifications, location, salary target, "
+            "or job preferences — even casually. This persists across all sessions."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "type": "object",
+                    "description": (
+                        "Key-value pairs to save. Supported keys: "
+                        "name, location, background, qualifications, "
+                        "targetSalary, preferences, notes. "
+                        "Values are free-form strings. "
+                        'e.g. {"background": "5 years software engineering", '
+                        '"targetSalary": "$120k+", "location": "Austin, TX"}'
+                    ),
+                }
+            },
+            "required": ["fields"],
+        },
+    },
 ]
-
-SYSTEM_PROMPT = (
-    "You are an AI assistant for a job application tracker. "
-    "You help users manage and query job applications across any industry.\n\n"
-    "Valid statuses: Not Applied, Applied, Call Recruiter, Interview, Rejected\n\n"
-    "## When a user pastes a job listing\n"
-    "Extract as many fields as possible and call add_job (or update_job if it already exists):\n"
-    "- company, title, location, payRange, schedule (hours/shift/remote/hybrid), payCycle, "
-    "requirements (degree, experience, certifications, skills, etc.), "
-    "benefits (bonus, equity, health, PTO, etc.), "
-    "recruiter (name + contact if listed), applyUrl, notes (anything else useful).\n"
-    "- Set status to 'Not Applied' unless the user says otherwise.\n"
-    "- Add alerts[] for anything the user should know at a glance:\n"
-    "  - type 'flag' (amber): action needed — e.g. 'Contact recruiter before applying', "
-    "'Certification required — verify you hold it', 'Application deadline approaching'\n"
-    "  - type 'warn' (red): potential blockers — e.g. 'Requires 5 yrs experience — verify you qualify', "
-    "'Contractor role — no benefits', 'Relocation required'\n"
-    "  - type 'info' (blue): helpful highlights — e.g. '$10,000 sign-on bonus', "
-    "'Remote-friendly', 'Internal referral available'\n\n"
-    "## General guidelines\n"
-    "- Be concise — one or two sentences unless detail is requested.\n"
-    "- When you modify data, briefly confirm what changed.\n"
-    "- Use list_jobs first if you need to find a job by company name "
-    "(IDs are slugs like 'acme-corp-new-york').\n"
-    "- Dates use YYYY-MM-DD format."
-)
 
 
 # ── Tool executor ─────────────────────────────────────────────────────────────
 
 def run_tool(name: str, tool_input: dict) -> str:
     try:
+        # Profile tools don't touch jobs.json
+        if name == "get_profile":
+            return json.dumps(load_profile().get("profile", {}))
+
+        if name == "update_profile":
+            data = load_profile()
+            data.setdefault("profile", {}).update(tool_input["fields"])
+            save_profile(data)
+            return json.dumps({"success": True, "updated": list(tool_input["fields"].keys())})
+
         data = load_jobs()
         jobs: list = data["jobs"]
 
@@ -249,6 +343,7 @@ def run_tool(name: str, tool_input: dict) -> str:
                 "recruiter": tool_input.get("recruiter", ""),
                 "applyUrl": tool_input.get("applyUrl", ""),
                 "alerts": tool_input.get("alerts", []),
+                "details": tool_input.get("details", {}),
                 "notes": tool_input.get("notes", ""),
             }
             jobs.append(job)
@@ -309,6 +404,19 @@ def get_jobs():
     return load_jobs()
 
 
+@app.get("/api/profile")
+def get_profile_endpoint():
+    return load_profile()
+
+
+@app.post("/api/profile")
+def save_profile_endpoint(body: dict):
+    data = load_profile()
+    data.setdefault("profile", {}).update(body)
+    save_profile(data)
+    return {"success": True}
+
+
 class ChatMessage(BaseModel):
     role: str
     content: Any  # str or list of content blocks
@@ -337,7 +445,7 @@ def chat(req: ChatRequest):
         response = client.messages.create(
             model="claude-opus-4-5",
             max_tokens=1024,
-            system=SYSTEM_PROMPT,
+            system=build_system_prompt(),
             tools=TOOLS,
             messages=messages,
         )

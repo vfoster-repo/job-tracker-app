@@ -351,6 +351,7 @@
     <div class="detail-row dp-benefits-row"><div class="detail-label">Benefits</div><div class="detail-value" id="dp-benefits"></div></div>
     <div class="detail-row dp-recruiter-row"><div class="detail-label">Recruiter</div><div class="detail-value" id="dp-recruiter"></div></div>
     <div class="detail-row dp-apply-row"><div class="detail-label">Apply At</div><div class="detail-value" id="dp-apply"></div></div>
+    <div id="dp-details-section"></div>
     <div class="detail-row"><div class="detail-label">Notes</div><div class="detail-value" id="dp-notes"></div></div>
   </div>
 </div>
@@ -552,6 +553,19 @@
     } else {
       applyEl.innerHTML = '';
       if (applyRow) applyRow.style.display = 'none';
+    }
+
+    // Flexible details object
+    const detailsSection = document.getElementById('dp-details-section');
+    detailsSection.innerHTML = '';
+    if (job.details && Object.keys(job.details).length) {
+      Object.entries(job.details).forEach(([k, v]) => {
+        if (!v) return;
+        const row = document.createElement('div');
+        row.className = 'detail-row';
+        row.innerHTML = `<div class="detail-label">${k}</div><div class="detail-value">${v}</div>`;
+        detailsSection.appendChild(row);
+      });
     }
 
     setField('dp-notes', job.notes);
