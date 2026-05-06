@@ -1,8 +1,8 @@
-# CDL-A Job Tracker — AI Assistant
+# Job Tracker — AI Assistant
 
 A self-hostable job application tracker with an embedded AI assistant (Claude) that can view, add, update, and remove entries via natural language chat.
 
-Built as a portfolio project from a real CDL-A job search in Millsap/Weatherford, TX.
+Built as a portfolio project. The demo is pre-loaded with sample data from a real job search.
 
 **[Live Demo →](https://vfoster-repo.github.io/cdl-job-tracker-app/)** *(AI disabled — read-only preview)*
 

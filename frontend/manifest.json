@@ -1,7 +1,7 @@
 {
-  "name": "CDL-A Job Tracker",
+  "name": "Job Tracker",
   "short_name": "Job Tracker",
-  "description": "AI-powered CDL-A job application tracker with natural language assistant",
+  "description": "AI-powered job application tracker with natural language assistant",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f1f5f9",

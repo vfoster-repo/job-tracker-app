@@ -12,7 +12,7 @@ from typing import Any, List, Optional
 
 load_dotenv()
 
-app = FastAPI(title="CDL Job Tracker AI", docs_url=None, redoc_url=None)
+app = FastAPI(title="Job Tracker AI", docs_url=None, redoc_url=None)
 
 app.add_middleware(
     CORSMiddleware,
@@ -138,7 +138,7 @@ TOOLS = [
 ]
 
 SYSTEM_PROMPT = (
-    "You are an AI assistant for a CDL-A truck driver job application tracker. "
+    "You are an AI assistant for a job application tracker. "
     "You help manage and query job applications using the provided tools.\n\n"
     "Valid statuses: Not Applied, Applied, Call Recruiter, Interview, Rejected\n\n"
     "Guidelines:\n"
