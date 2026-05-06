@@ -66,7 +66,12 @@ TOOLS = [
     },
     {
         "name": "add_job",
-        "description": "Add a new job application to the tracker.",
+        "description": (
+            "Add a new job application to the tracker. "
+            "When a user pastes a job listing, extract all available fields from it. "
+            "Use alerts to flag important items such as qualification gaps, "
+            "required certifications, action items, or anything the user needs to know at a glance."
+        ),
         "input_schema": {
             "type": "object",
             "properties": {
@@ -95,6 +100,46 @@ TOOLS = [
                     "type": "string",
                     "description": "Pay info, e.g. '$1,450+/wk' or '$23-25/hr'",
                 },
+                "schedule": {
+                    "type": "string",
+                    "description": "Work schedule / home time, e.g. 'Home daily, Mon-Fri 6am-3pm'",
+                },
+                "payCycle": {
+                    "type": "string",
+                    "description": "How often paid, e.g. 'Weekly — every Friday'",
+                },
+                "requirements": {
+                    "type": "string",
+                    "description": "License, experience, endorsements, or other requirements",
+                },
+                "benefits": {
+                    "type": "string",
+                    "description": "Benefits, sign-on bonus, perks, etc.",
+                },
+                "recruiter": {
+                    "type": "string",
+                    "description": "Recruiter name and contact info if available",
+                },
+                "applyUrl": {
+                    "type": "string",
+                    "description": "URL or site where user can apply",
+                },
+                "alerts": {
+                    "type": "array",
+                    "description": "Important flagged items shown prominently in the UI",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": ["warn", "info", "flag"],
+                                "description": "warn=red (issue/rejection), info=blue (neutral), flag=amber (action needed)",
+                            },
+                            "message": {"type": "string"},
+                        },
+                        "required": ["type", "message"],
+                    },
+                },
                 "notes": {"type": "string"},
             },
             "required": ["id", "company", "title", "location", "status"],
@@ -104,7 +149,9 @@ TOOLS = [
         "name": "update_job",
         "description": (
             "Update one or more fields on an existing job. "
-            "Use to change status, add notes, update pay info, etc."
+            "Use to change status, add notes, update pay info, add/replace alerts, etc. "
+            "To add a single alert without replacing all alerts, first use get_job to "
+            "read the current alerts array, then pass the full updated array."
         ),
         "input_schema": {
             "type": "object",
@@ -116,8 +163,10 @@ TOOLS = [
                 "fields": {
                     "type": "object",
                     "description": (
-                        'Key-value pairs to update, e.g. '
-                        '{"status": "Rejected", "notes": "Pay too low"}'
+                        'Key-value pairs to update. Supports all job fields including '
+                        'schedule, payCycle, requirements, benefits, recruiter, applyUrl, '
+                        'alerts (array), and notes. '
+                        'e.g. {"status": "Rejected", "alerts": [{"type": "warn", "message": "Rejected 3/25"}]}'
                     ),
                 },
             },
@@ -139,13 +188,27 @@ TOOLS = [
 
 SYSTEM_PROMPT = (
     "You are an AI assistant for a job application tracker. "
-    "You help manage and query job applications using the provided tools.\n\n"
+    "You help users manage and query job applications across any industry.\n\n"
     "Valid statuses: Not Applied, Applied, Call Recruiter, Interview, Rejected\n\n"
-    "Guidelines:\n"
+    "## When a user pastes a job listing\n"
+    "Extract as many fields as possible and call add_job (or update_job if it already exists):\n"
+    "- company, title, location, payRange, schedule (hours/shift/remote/hybrid), payCycle, "
+    "requirements (degree, experience, certifications, skills, etc.), "
+    "benefits (bonus, equity, health, PTO, etc.), "
+    "recruiter (name + contact if listed), applyUrl, notes (anything else useful).\n"
+    "- Set status to 'Not Applied' unless the user says otherwise.\n"
+    "- Add alerts[] for anything the user should know at a glance:\n"
+    "  - type 'flag' (amber): action needed — e.g. 'Contact recruiter before applying', "
+    "'Certification required — verify you hold it', 'Application deadline approaching'\n"
+    "  - type 'warn' (red): potential blockers — e.g. 'Requires 5 yrs experience — verify you qualify', "
+    "'Contractor role — no benefits', 'Relocation required'\n"
+    "  - type 'info' (blue): helpful highlights — e.g. '$10,000 sign-on bonus', "
+    "'Remote-friendly', 'Internal referral available'\n\n"
+    "## General guidelines\n"
     "- Be concise — one or two sentences unless detail is requested.\n"
     "- When you modify data, briefly confirm what changed.\n"
     "- Use list_jobs first if you need to find a job by company name "
-    "(IDs are slugs like 'ryder-millsap').\n"
+    "(IDs are slugs like 'acme-corp-new-york').\n"
     "- Dates use YYYY-MM-DD format."
 )
 
@@ -179,6 +242,13 @@ def run_tool(name: str, tool_input: dict) -> str:
                 "status": tool_input["status"],
                 "date": tool_input.get("date"),
                 "payRange": tool_input.get("payRange", ""),
+                "schedule": tool_input.get("schedule", ""),
+                "payCycle": tool_input.get("payCycle", ""),
+                "requirements": tool_input.get("requirements", ""),
+                "benefits": tool_input.get("benefits", ""),
+                "recruiter": tool_input.get("recruiter", ""),
+                "applyUrl": tool_input.get("applyUrl", ""),
+                "alerts": tool_input.get("alerts", []),
                 "notes": tool_input.get("notes", ""),
             }
             jobs.append(job)

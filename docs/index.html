@@ -245,6 +245,17 @@
     }
     .detail-value { font-size: 0.9rem; color: var(--text); line-height: 1.5; }
     .detail-value.empty { color: var(--muted); font-style: italic; }
+    .detail-value a { color: var(--accent); word-break: break-all; }
+
+    /* Inline alerts inside detail panel */
+    #dp-alerts { display: flex; flex-direction: column; gap: 8px; }
+    .dp-alert {
+      padding: 10px 14px; border-radius: 8px;
+      font-size: 0.82rem; line-height: 1.5;
+    }
+    .dp-alert-warn    { background: rgba(220,38,38,0.08);  border: 1px solid rgba(220,38,38,0.2);  color: #b91c1c; }
+    .dp-alert-info    { background: rgba(2,132,199,0.08);  border: 1px solid rgba(2,132,199,0.2);  color: #0369a1; }
+    .dp-alert-flag    { background: rgba(217,119,6,0.08);  border: 1px solid rgba(217,119,6,0.25); color: #92400e; }
 
     /* clickable rows */
     tbody tr { cursor: pointer; }
@@ -329,9 +340,18 @@
     <button class="detail-close" id="detail-close" aria-label="Close details">✕</button>
   </div>
   <div class="detail-body">
+    <div id="dp-alerts"></div>
     <div class="detail-row"><div class="detail-label">Status</div><div class="detail-value" id="dp-status"></div></div>
     <div class="detail-row"><div class="detail-label">Location</div><div class="detail-value" id="dp-location"></div></div>
     <div class="detail-row"><div class="detail-label">Date Applied</div><div class="detail-value" id="dp-date"></div></div>
+    <div class="detail-row"><div class="detail-label">Pay</div><div class="detail-value" id="dp-pay"></div></div>
+    <div class="detail-row dp-schedule-row"><div class="detail-label">Schedule</div><div class="detail-value" id="dp-schedule"></div></div>
+    <div class="detail-row dp-cycle-row"><div class="detail-label">Pay Cycle</div><div class="detail-value" id="dp-cycle"></div></div>
+    <div class="detail-row dp-req-row"><div class="detail-label">Requirements</div><div class="detail-value" id="dp-req"></div></div>
+    <div class="detail-row dp-benefits-row"><div class="detail-label">Benefits</div><div class="detail-value" id="dp-benefits"></div></div>
+    <div class="detail-row dp-recruiter-row"><div class="detail-label">Recruiter</div><div class="detail-value" id="dp-recruiter"></div></div>
+    <div class="detail-row dp-apply-row"><div class="detail-label">Apply At</div><div class="detail-value" id="dp-apply"></div></div>
+    <div class="detail-row"><div class="detail-label">Notes</div><div class="detail-value" id="dp-notes"></div></div>
   </div>
 </div>
 
@@ -395,25 +415,25 @@
 <script>
   // ── Static demo data ──────────────────────────────────────────────────────────
   const JOBS = [
-    { id:"ryder-millsap",           company:"Ryder",                          title:"Class A CDL Regional Flatbed Driver",              location:"Millsap, TX",      status:"Applied",        date:"2026-03-25" },
-    { id:"luckys-ready-mix",        company:"Lucky's Ready Mix",              title:"Experienced Ready Mix Driver — Concrete Mixer",     location:"Cresson, TX",      status:"Applied",        date:"2026-03-26" },
-    { id:"j7-ready-mix",            company:"J7 Ready Mix, LLC",              title:"CDL Mixer Driver — Concrete / Ready Mix",           location:"Cresson, TX",      status:"Applied",        date:"2026-03-25" },
-    { id:"mayer-azle",              company:"MAYER",                          title:"Class A CDL Driver — Bulk Soil Delivery",           location:"Azle, TX",         status:"Applied",        date:"2026-03-25" },
-    { id:"cd-hartnett",             company:"The C.D. Hartnett Company",      title:"Class A Delivery Driver — Grocery Distribution",    location:"Weatherford, TX",  status:"Applied",        date:"2026-03-25" },
-    { id:"carpenter-milk-services", company:"Carpenter Milk Services (CMS)",  title:"CDL Driver — Milk Tanker, Home Daily",              location:"Stephenville, TX", status:"Applied",        date:"2026-03-25" },
-    { id:"penske-weatherford-job",  company:"Penske Logistics",               title:"Truck Driver — Local Class A Floater",              location:"Weatherford, TX",  status:"Applied",        date:"2026-03-25" },
-    { id:"hirschbach",              company:"Hirschbach Motor Lines",          title:"CA-TX Expedited Company Driver",                    location:"Aledo, TX",        status:"Call Recruiter", date:null },
-    { id:"geodynamics-millsap",     company:"GEODynamics",                    title:"CDL Hazmat Driver / Warehouse",                     location:"Millsap, TX",      status:"Applied",        date:"2026-03-09" },
-    { id:"kenan-advantage-group",   company:"Kenan Advantage Group (KAG)",    title:"CDL-A Local Tanker Driver",                        location:"Weatherford, TX",  status:"Call Recruiter", date:null },
-    { id:"groendyke-transport",     company:"Groendyke Transport",            title:"Local CDL-A Tanker Driver",                         location:"Fort Worth, TX",   status:"Applied",        date:"2026-03-20" },
-    { id:"new-tex-trucking",        company:"New Tex Trucking",               title:"Class A CDL Truck Driver — Water Hauling",          location:"Cresson, TX",      status:"Applied",        date:"2026-03-20" },
-    { id:"western-dairy-transport", company:"Western Dairy Transport",        title:"CDL-A Local Driver — Milk/Dairy Tanker",            location:"Local (TX)",       status:"Rejected",       date:"2026-03-13" },
-    { id:"penske-mineral-wells-job",company:"Penske Logistics",               title:"CDL-A Local Driver — Flatbed / Forklift",           location:"Mineral Wells, TX",status:"Rejected",       date:"2026-03-09" },
-    { id:"hampel-oil",              company:"Hampel Oil Distributors",        title:"CDL Delivery Driver — Fuel & Oil Lubricant",        location:"Cresson, TX",      status:"Rejected",       date:"2026-03-18" },
-    { id:"texas-transeastern-inc-tte",company:"Texas TransEastern Inc. (TTE)",title:"CDL A Company Tanker Local Home Daily",             location:"Fort Worth, TX",   status:"Rejected",       date:"2026-03-20" },
-    { id:"core48-transport-llc",    company:"CORE48 Transport, LLC",          title:"CDL-A Regional Tanker Truck Driver",                location:"Weatherford, TX",  status:"Rejected",       date:null },
-    { id:"schlumberger-slb",        company:"Schlumberger (SLB)",             title:"Local HazMat CDL Driver — Chemical Delivery",       location:"Weatherford, OK",  status:"Rejected",       date:null },
-    { id:"penn-tank-lines",         company:"Penn Tank Lines",                title:"Local CDL-A Fuel Tanker — Owner Operator",          location:"Local (TX)",       status:"Rejected",       date:null },
+    { id:"ryder-millsap",             company:"Ryder",                           title:"Class A CDL Regional Flatbed Driver",                  location:"Millsap, TX",       status:"Applied",        date:"2026-03-25", payRange:"$1,450+/wk",              notes:"Dispatches from Millsap TX — no commute. Flatbed + Moffett forklift. $0.665/mile + $21.79/stop. Recruiter Chelsey (904) 932-0143, text 'Millsap Regional'." },
+    { id:"luckys-ready-mix",          company:"Lucky's Ready Mix",               title:"Experienced Ready Mix Driver — Concrete Mixer",        location:"Cresson, TX",       status:"Applied",        date:"2026-03-26", payRange:"$23.25–27/hr DOE",         notes:"Up to 70 hrs/week. In-person interview preferred." },
+    { id:"j7-ready-mix",              company:"J7 Ready Mix, LLC",               title:"CDL Mixer Driver — Concrete / Ready Mix",              location:"Cresson, TX",       status:"Applied",        date:"2026-03-25", payRange:"From $23/hr",              notes:"New plant opening in Cresson. 40 hrs/week guaranteed." },
+    { id:"mayer-azle",                company:"MAYER",                           title:"Class A CDL Driver — Bulk Soil Delivery (Flatbed / Dump)", location:"Azle, TX",       status:"Applied",        date:"2026-03-25", payRange:"$23–25/hr",                notes:"Bulk soil delivery, flatbed/dump. Moffett required. Some regional trips." },
+    { id:"cd-hartnett",               company:"The C.D. Hartnett Company",       title:"Class A Delivery Driver — Grocery Distribution",       location:"Weatherford, TX",   status:"Applied",        date:"2026-03-25", payRange:"$1,300–1,500+/wk",         notes:"Grocery distribution. Midnight–3am dispatch. 1–3 nights/week out of town. $3,000 sign-on bonus." },
+    { id:"carpenter-milk-services",   company:"Carpenter Milk Services (CMS)",   title:"CDL Driver — Milk Tanker, Home Daily",                 location:"Stephenville, TX",  status:"Applied",        date:"2026-03-25", payRange:"$165–330/day (load-based)", notes:"Contact Curry Hooks (254) 485-7925." },
+    { id:"penske-weatherford-job",    company:"Penske Logistics",                title:"Truck Driver — Local Class A Floater",                 location:"Weatherford, TX",   status:"Applied",        date:"2026-03-25", payRange:"$24.75/hr",                notes:"192 Cartwright Park Rd, Weatherford TX. Referred by Mineral Wells recruiter. Req ID 2601847." },
+    { id:"hirschbach",                company:"Hirschbach Motor Lines",           title:"CA-TX Expedited Company Driver",                       location:"Aledo, TX",         status:"Call Recruiter", date:null,         payRange:"$260–280/day",             notes:"First on waiting list. Recruiter Lauren (402) 404-2433." },
+    { id:"geodynamics-millsap",       company:"GEODynamics",                     title:"CDL Hazmat Driver / Warehouse",                        location:"Millsap, TX",       status:"Applied",        date:"2026-03-09", payRange:"",                         notes:"Hazmat endorsement required. Local to Millsap." },
+    { id:"kenan-advantage-group",     company:"Kenan Advantage Group (KAG)",     title:"CDL-A Local Tanker Driver",                            location:"Weatherford, TX",   status:"Call Recruiter", date:null,         payRange:"",                         notes:"Local tanker. Need to call recruiter to discuss opening." },
+    { id:"groendyke-transport",       company:"Groendyke Transport",             title:"Local CDL-A Tanker Driver",                            location:"Fort Worth, TX",    status:"Applied",        date:"2026-03-20", payRange:"",                         notes:"" },
+    { id:"new-tex-trucking",          company:"New Tex Trucking",                title:"Class A CDL Truck Driver — Water Hauling",             location:"Cresson, TX",       status:"Applied",        date:"2026-03-20", payRange:"",                         notes:"Tanker endorsement required." },
+    { id:"western-dairy-transport",   company:"Western Dairy Transport",         title:"CDL-A Local Driver — Milk/Dairy Tanker",               location:"Local (TX)",        status:"Rejected",       date:"2026-03-13", payRange:"$22/hr",                   notes:"$22/hr offer declined — below $80K target, no OT pay." },
+    { id:"penske-mineral-wells-job",  company:"Penske Logistics",                title:"CDL-A Local Driver — Flatbed / Forklift",              location:"Mineral Wells, TX", status:"Rejected",       date:"2026-03-09", payRange:"",                         notes:"Referred to Weatherford location instead." },
+    { id:"hampel-oil",                company:"Hampel Oil Distributors",         title:"CDL Delivery Driver — Fuel & Oil Lubricant",           location:"Cresson, TX",       status:"Rejected",       date:"2026-03-18", payRange:"",                         notes:"" },
+    { id:"texas-transeastern-inc-tte",company:"Texas TransEastern Inc. (TTE)",   title:"CDL A Company Tanker Local Home Daily",                location:"Fort Worth, TX",    status:"Rejected",       date:"2026-03-20", payRange:"",                         notes:"" },
+    { id:"core48-transport-llc",      company:"CORE48 Transport, LLC",           title:"CDL-A Regional Tanker Truck Driver",                   location:"Weatherford, TX",   status:"Rejected",       date:null,         payRange:"",                         notes:"" },
+    { id:"schlumberger-slb",          company:"Schlumberger (SLB)",              title:"Local HazMat CDL Driver — Chemical Delivery",          location:"Weatherford, OK",   status:"Rejected",       date:null,         payRange:"",                         notes:"Location in Oklahoma — too far." },
+    { id:"penn-tank-lines",           company:"Penn Tank Lines",                 title:"Local CDL-A Fuel Tanker — Owner Operator",             location:"Local (TX)",        status:"Rejected",       date:null,         payRange:"",                         notes:"Owner operator only — not company driver." },
   ];
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -476,6 +496,17 @@
   const detailPanel   = document.getElementById('detail-panel');
   const detailClose   = document.getElementById('detail-close');
 
+  function setField(id, value, rowClass) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = value || '—';
+    el.className   = 'detail-value' + (value ? '' : ' empty');
+    if (rowClass) {
+      const row = document.querySelector('.' + rowClass);
+      if (row) row.style.display = value ? '' : 'none';
+    }
+  }
+
   function openDetail(job) {
     const statusClass = job.status.toLowerCase().replace(/\s+/g, '-');
     document.getElementById('dp-company').textContent  = job.company;
@@ -483,12 +514,47 @@
     document.getElementById('dp-location').textContent = job.location;
     document.getElementById('dp-date').textContent     = fmtDate(job.date);
 
+    // Status badge
     const statusEl = document.getElementById('dp-status');
     statusEl.innerHTML = '';
     const badge = document.createElement('span');
-    badge.className  = 'badge badge-' + statusClass;
+    badge.className   = 'badge badge-' + statusClass;
     badge.textContent = job.status;
     statusEl.appendChild(badge);
+
+    // Alerts
+    const alertsEl = document.getElementById('dp-alerts');
+    alertsEl.innerHTML = '';
+    if (job.alerts && job.alerts.length) {
+      job.alerts.forEach(a => {
+        const div = document.createElement('div');
+        div.className = 'dp-alert dp-alert-' + a.type;
+        div.textContent = a.message;
+        alertsEl.appendChild(div);
+      });
+    }
+
+    // Optional fields — hide row when empty
+    setField('dp-pay',       job.payRange);
+    setField('dp-schedule',  job.schedule,     'dp-schedule-row');
+    setField('dp-cycle',     job.payCycle,     'dp-cycle-row');
+    setField('dp-req',       job.requirements, 'dp-req-row');
+    setField('dp-benefits',  job.benefits,     'dp-benefits-row');
+    setField('dp-recruiter', job.recruiter,    'dp-recruiter-row');
+
+    // Apply URL — render as link if present
+    const applyEl  = document.getElementById('dp-apply');
+    const applyRow = document.querySelector('.dp-apply-row');
+    if (job.applyUrl) {
+      applyEl.innerHTML = `<a href="${job.applyUrl}" target="_blank" rel="noopener noreferrer">${job.applyUrl}</a>`;
+      applyEl.className = 'detail-value';
+      if (applyRow) applyRow.style.display = '';
+    } else {
+      applyEl.innerHTML = '';
+      if (applyRow) applyRow.style.display = 'none';
+    }
+
+    setField('dp-notes', job.notes);
 
     detailOverlay.classList.add('open');
     detailPanel.classList.add('open');

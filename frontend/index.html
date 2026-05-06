@@ -437,6 +437,17 @@
     }
     .detail-value { font-size: 0.9rem; color: var(--text); line-height: 1.5; }
     .detail-value.empty { color: var(--muted); font-style: italic; }
+    .detail-value a { color: var(--accent); word-break: break-all; }
+
+    /* Inline alerts inside detail panel */
+    #dp-alerts { display: flex; flex-direction: column; gap: 8px; }
+    .dp-alert {
+      padding: 10px 14px; border-radius: 8px;
+      font-size: 0.82rem; line-height: 1.5;
+    }
+    .dp-alert-warn    { background: rgba(220,38,38,0.08);  border: 1px solid rgba(220,38,38,0.2);  color: #b91c1c; }
+    .dp-alert-info    { background: rgba(2,132,199,0.08);  border: 1px solid rgba(2,132,199,0.2);  color: #0369a1; }
+    .dp-alert-flag    { background: rgba(217,119,6,0.08);  border: 1px solid rgba(217,119,6,0.25); color: #92400e; }
 
     /* clickable rows */
     tbody tr { cursor: pointer; }
@@ -544,10 +555,17 @@
     <button class="detail-close" id="detail-close" aria-label="Close details">✕</button>
   </div>
   <div class="detail-body">
+    <div id="dp-alerts"></div>
     <div class="detail-row"><div class="detail-label">Status</div><div class="detail-value" id="dp-status"></div></div>
     <div class="detail-row"><div class="detail-label">Location</div><div class="detail-value" id="dp-location"></div></div>
     <div class="detail-row"><div class="detail-label">Date Applied</div><div class="detail-value" id="dp-date"></div></div>
     <div class="detail-row"><div class="detail-label">Pay</div><div class="detail-value" id="dp-pay"></div></div>
+    <div class="detail-row dp-schedule-row"><div class="detail-label">Schedule</div><div class="detail-value" id="dp-schedule"></div></div>
+    <div class="detail-row dp-cycle-row"><div class="detail-label">Pay Cycle</div><div class="detail-value" id="dp-cycle"></div></div>
+    <div class="detail-row dp-req-row"><div class="detail-label">Requirements</div><div class="detail-value" id="dp-req"></div></div>
+    <div class="detail-row dp-benefits-row"><div class="detail-label">Benefits</div><div class="detail-value" id="dp-benefits"></div></div>
+    <div class="detail-row dp-recruiter-row"><div class="detail-label">Recruiter</div><div class="detail-value" id="dp-recruiter"></div></div>
+    <div class="detail-row dp-apply-row"><div class="detail-label">Apply At</div><div class="detail-value" id="dp-apply"></div></div>
     <div class="detail-row"><div class="detail-label">Notes</div><div class="detail-value" id="dp-notes"></div></div>
   </div>
 </div>
@@ -705,6 +723,17 @@
   const detailPanel   = document.getElementById('detail-panel');
   const detailClose   = document.getElementById('detail-close');
 
+  function setField(id, value, rowClass) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = value || '—';
+    el.className   = 'detail-value' + (value ? '' : ' empty');
+    if (rowClass) {
+      const row = document.querySelector('.' + rowClass);
+      if (row) row.style.display = value ? '' : 'none';
+    }
+  }
+
   function openDetail(job) {
     const statusClass = job.status.toLowerCase().replace(/\s+/g, '-');
     document.getElementById('dp-company').textContent  = job.company;
@@ -712,20 +741,47 @@
     document.getElementById('dp-location').textContent = job.location;
     document.getElementById('dp-date').textContent     = fmtDate(job.date);
 
+    // Status badge
     const statusEl = document.getElementById('dp-status');
     statusEl.innerHTML = '';
     const badge = document.createElement('span');
-    badge.className  = 'badge badge-' + statusClass;
+    badge.className   = 'badge badge-' + statusClass;
     badge.textContent = job.status;
     statusEl.appendChild(badge);
 
-    const payEl = document.getElementById('dp-pay');
-    payEl.textContent  = job.payRange || '—';
-    payEl.className    = 'detail-value' + (job.payRange ? '' : ' empty');
+    // Alerts
+    const alertsEl = document.getElementById('dp-alerts');
+    alertsEl.innerHTML = '';
+    if (job.alerts && job.alerts.length) {
+      job.alerts.forEach(a => {
+        const div = document.createElement('div');
+        div.className = 'dp-alert dp-alert-' + a.type;
+        div.textContent = a.message;
+        alertsEl.appendChild(div);
+      });
+    }
 
-    const notesEl = document.getElementById('dp-notes');
-    notesEl.textContent = job.notes || 'No notes.';
-    notesEl.className   = 'detail-value' + (job.notes ? '' : ' empty');
+    // Optional fields — hide row when empty
+    setField('dp-pay',       job.payRange);
+    setField('dp-schedule',  job.schedule,     'dp-schedule-row');
+    setField('dp-cycle',     job.payCycle,     'dp-cycle-row');
+    setField('dp-req',       job.requirements, 'dp-req-row');
+    setField('dp-benefits',  job.benefits,     'dp-benefits-row');
+    setField('dp-recruiter', job.recruiter,    'dp-recruiter-row');
+
+    // Apply URL — render as link if present
+    const applyEl  = document.getElementById('dp-apply');
+    const applyRow = document.querySelector('.dp-apply-row');
+    if (job.applyUrl) {
+      applyEl.innerHTML = `<a href="${job.applyUrl}" target="_blank" rel="noopener noreferrer">${job.applyUrl}</a>`;
+      applyEl.className = 'detail-value';
+      if (applyRow) applyRow.style.display = '';
+    } else {
+      applyEl.innerHTML = '';
+      if (applyRow) applyRow.style.display = 'none';
+    }
+
+    setField('dp-notes', job.notes);
 
     detailOverlay.classList.add('open');
     detailPanel.classList.add('open');
