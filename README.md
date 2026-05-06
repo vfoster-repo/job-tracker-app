@@ -4,7 +4,7 @@ A self-hostable job application tracker with an embedded AI assistant (Claude) t
 
 Built as a portfolio project. The demo is pre-loaded with sample data from a real job search.
 
-**[Live Demo →](https://vfoster-repo.github.io/cdl-job-tracker-app/)** *(AI disabled — read-only preview)*
+**[Live Demo →](https://vfoster-repo.github.io/job-tracker-app/)** *(AI disabled — read-only preview)*
 
 ---
 
@@ -33,8 +33,8 @@ Built as a portfolio project. The demo is pre-loaded with sample data from a rea
 
 ```bash
 # 1. Clone
-git clone https://github.com/vfoster-repo/cdl-job-tracker-app
-cd cdl-job-tracker-app
+git clone https://github.com/vfoster-repo/job-tracker-app
+cd job-tracker-app
 
 # 2. Install dependencies
 pip install -r requirements.txt
@@ -56,7 +56,7 @@ The tracker loads at `http://localhost:8000`. Click **Ask AI** to open the chat 
 ## Project Layout
 
 ```
-cdl-job-tracker-app/
+job-tracker-app/
 ├── main.py              ← FastAPI app (API + serves frontend)
 ├── requirements.txt
 ├── .env.example
@@ -76,7 +76,7 @@ The `docs/` folder is the static demo served by GitHub Pages. To enable it:
 1. Go to your repo **Settings → Pages**
 2. Source: **Deploy from a branch**
 3. Branch: `main`, folder: `/docs`
-4. Save — your demo will be live at `https://your-username.github.io/cdl-job-tracker-app/`
+4. Save — your demo will be live at `https://your-username.github.io/job-tracker-app/`
 
 ---
 
