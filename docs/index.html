@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CDL-A Job Tracker — Demo</title>
+  <style>
+    :root {
+      --bg:             #f1f5f9;
+      --surface:        #ffffff;
+      --border:         #e2e8f0;
+      --text:           #1e293b;
+      --muted:          #64748b;
+      --accent:         #2563eb;
+      --interview:      #d97706;
+      --call-recruiter: #7c3aed;
+      --applied:        #16a34a;
+      --not-applied:    #64748b;
+      --rejected:       #dc2626;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 100px;
+    }
+
+    /* ── Demo banner ── */
+    .demo-banner {
+      max-width: 1100px;
+      margin: 0 auto 20px;
+      background: #fef9c3;
+      border: 1px solid #fde047;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 0.85rem;
+      color: #713f12;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .demo-banner a {
+      color: #1d4ed8;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .demo-banner a:hover { text-decoration: underline; }
+
+    /* ── Header ── */
+    header { max-width: 1100px; margin: 0 auto 28px; }
+    .header-top { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
+    .truck-icon { font-size: 2rem; line-height: 1; }
+    h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
+    .subtitle { color: var(--muted); font-size: 0.875rem; margin-left: 50px; }
+
+    /* ── Stats ── */
+    .stats { max-width: 1100px; margin: 0 auto 24px; display: flex; gap: 14px; flex-wrap: wrap; }
+    .stat-card { flex: 1; min-width: 140px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; text-align: center; }
+    .stat-card .number { font-size: 2rem; font-weight: 700; line-height: 1; }
+    .stat-card .label  { font-size: 0.78rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat-card.interview      .number { color: var(--interview); }
+    .stat-card.call-recruiter .number { color: var(--call-recruiter); }
+    .stat-card.applied        .number { color: var(--applied); }
+    .stat-card.rejected       .number { color: var(--rejected); }
+    .stat-card.not-app        .number { color: var(--not-applied); }
+    .stat-card.total          .number { color: var(--accent); }
+
+    /* ── Filters ── */
+    .filters { max-width: 1100px; margin: 0 auto 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .filter-btn { border: 1px solid var(--border); background: var(--surface); color: var(--muted); padding: 7px 18px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: all 0.15s; }
+    .filter-btn:hover { border-color: var(--accent); color: var(--text); }
+    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+
+    /* ── Table ── */
+    .table-wrap { max-width: 1100px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { background: #f8fafc; color: var(--muted); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.08em; padding: 13px 18px; text-align: left; border-bottom: 1px solid var(--border); }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f0f6ff; }
+    td { padding: 14px 18px; font-size: 0.9rem; vertical-align: middle; }
+    .company-name { font-weight: 600; }
+    .job-title    { color: var(--muted); font-size: 0.82rem; margin-top: 3px; }
+    .location     { color: var(--muted); font-size: 0.88rem; }
+    .date-cell    { color: var(--muted); font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+    .badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .badge-interview      { background: rgba(245,158,11,0.15); color: var(--interview);      border: 1px solid rgba(245,158,11,0.3); }
+    .badge-interview::before { background: var(--interview); }
+    .badge-applied        { background: rgba(34,197,94,0.12);  color: var(--applied);        border: 1px solid rgba(34,197,94,0.25); }
+    .badge-applied::before   { background: var(--applied); }
+    .badge-not-applied    { background: rgba(100,116,139,0.12); color: var(--not-applied);   border: 1px solid rgba(100,116,139,0.2); }
+    .badge-not-applied::before { background: var(--not-applied); }
+    .badge-call-recruiter { background: rgba(124,58,237,0.12); color: var(--call-recruiter); border: 1px solid rgba(124,58,237,0.25); }
+    .badge-call-recruiter::before { background: var(--call-recruiter); }
+    .badge-rejected       { background: rgba(220,38,38,0.1);   color: var(--rejected);       border: 1px solid rgba(220,38,38,0.25); }
+    .badge-rejected::before   { background: var(--rejected); }
+
+    .updated { max-width: 1100px; margin: 16px auto 0; text-align: right; font-size: 0.78rem; color: var(--muted); }
+
+    /* ── Chat FAB ── */
+    .chat-fab {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 50px;
+      padding: 13px 22px; font-size: 0.9rem; font-weight: 600;
+      font-family: inherit; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(37,99,235,0.45);
+      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 100; display: flex; align-items: center; gap: 8px;
+    }
+    .chat-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(37,99,235,0.55); }
+
+    /* ── Chat Panel ── */
+    .chat-panel {
+      position: fixed; bottom: 0; right: 24px;
+      width: 380px; height: 520px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-bottom: none; border-radius: 16px 16px 0 0;
+      box-shadow: 0 -4px 30px rgba(0,0,0,0.13);
+      display: flex; flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+      z-index: 200;
+    }
+    .chat-panel.open { transform: translateY(0); }
+    .chat-header { padding: 14px 18px; border-bottom: 1px solid var(--border); border-radius: 16px 16px 0 0; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .chat-header-title { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.92rem; }
+    .chat-header-dot   { width: 8px; height: 8px; background: #f59e0b; border-radius: 50%; }
+    .chat-close-btn    { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1rem; padding: 4px 8px; border-radius: 6px; font-family: inherit; line-height: 1; }
+    .chat-close-btn:hover { background: var(--bg); color: var(--text); }
+
+    .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .chat-msg { display: flex; }
+    .chat-msg.assistant { justify-content: flex-start; }
+    .bubble { max-width: 86%; padding: 10px 14px; border-radius: 16px; font-size: 0.875rem; line-height: 1.5; }
+    .assistant .bubble { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+
+    /* ── Disabled input ── */
+    .chat-input-row { padding: 12px 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-shrink: 0; }
+    #chat-input {
+      flex: 1; border: 1px solid var(--border); border-radius: 20px;
+      padding: 9px 16px; font-size: 0.875rem; font-family: inherit;
+      outline: none; background: #f8fafc; color: var(--muted);
+      cursor: pointer;
+    }
+    #chat-send {
+      background: var(--border); color: var(--muted);
+      border: none; border-radius: 50%; width: 38px; height: 38px;
+      cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    /* ── Demo modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; padding: 16px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.visible { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--surface); border-radius: 16px;
+      padding: 32px 28px; max-width: 440px; width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      transform: scale(0.96); transition: transform 0.2s;
+    }
+    .modal-overlay.visible .modal { transform: scale(1); }
+
+    .modal-icon  { font-size: 2.4rem; margin-bottom: 12px; }
+    .modal h2    { font-size: 1.2rem; margin-bottom: 10px; }
+    .modal p     { color: var(--muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px; }
+    .modal ol    { color: var(--muted); font-size: 0.9rem; line-height: 1.9; padding-left: 20px; margin-bottom: 24px; }
+    .modal code  { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-size: 0.82rem; color: var(--text); }
+    .modal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-primary { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-size: 0.88rem; font-weight: 600; font-family: inherit; cursor: pointer; text-decoration: none; display: inline-block; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 20px; font-size: 0.88rem; font-family: inherit; cursor: pointer; }
+    .btn-secondary:hover { background: #e2e8f0; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .table-wrap { border-radius: 0; border-left: none; border-right: none; margin: 0 -16px; }
+      table { display: block; } thead { display: none; } tbody { display: block; }
+      tbody tr { display: flex; flex-wrap: wrap; padding: 14px 16px; border-bottom: 1px solid var(--border); gap: 0; }
+      tbody tr td { display: block; padding: 0; border: none; }
+      tbody tr td:first-child  { display: none; }
+      tbody tr td:nth-child(2) { width: 100%; padding-bottom: 4px; }
+      tbody tr td:nth-child(3) { width: 100%; font-size: 0.82rem; color: var(--muted); padding-bottom: 8px; }
+      tbody tr td:nth-child(4) { width: auto; }
+      tbody tr td:nth-child(5) { display: none; }
+      .stats { gap: 10px; }
+      .stat-card { min-width: calc(50% - 5px); }
+      .chat-panel { right: 0; width: 100%; border-radius: 16px 16px 0 0; }
+      .chat-fab   { right: 16px; bottom: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Demo banner ── -->
+<div class="demo-banner">
+  <span>🔍 <strong>Demo</strong> — This is a read-only preview with sample data.</span>
+  <a href="https://github.com/vfoster-repo/cdl-job-tracker-app" target="_blank" rel="noopener">View on GitHub ↗</a>
+</div>
+
+<!-- ── Header ── -->
+<header>
+  <div class="header-top">
+    <span class="truck-icon">🚛</span>
+    <h1>CDL-A Job Tracker</h1>
+  </div>
+  <p class="subtitle">Millsap / Weatherford, TX Area &nbsp;·&nbsp; CDL-A | Hazmat | Tanker | Doubles/Triples</p>
+</header>
+
+<!-- ── Stats ── -->
+<div class="stats">
+  <div class="stat-card total">        <div class="number" id="stat-total">—</div>        <div class="label">Total Tracked</div>   </div>
+  <div class="stat-card interview">     <div class="number" id="stat-interview">—</div>      <div class="label">Interview</div>         </div>
+  <div class="stat-card call-recruiter"><div class="number" id="stat-call-recruiter">—</div> <div class="label">Call Recruiter</div>    </div>
+  <div class="stat-card applied">       <div class="number" id="stat-applied">—</div>        <div class="label">Applied</div>           </div>
+  <div class="stat-card rejected">      <div class="number" id="stat-rejected">—</div>       <div class="label">Rejected</div>          </div>
+  <div class="stat-card not-app">       <div class="number" id="stat-not">—</div>            <div class="label">Not Applied</div>       </div>
+</div>
+
+<!-- ── Filters ── -->
+<div class="filters">
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="Interview">Interview</button>
+  <button class="filter-btn" data-filter="Call Recruiter">Call Recruiter</button>
+  <button class="filter-btn" data-filter="Applied">Applied</button>
+  <button class="filter-btn" data-filter="Rejected">Rejected</button>
+  <button class="filter-btn" data-filter="Not Applied">Not Applied</button>
+</div>
+
+<!-- ── Table ── -->
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>Company</th><th>Location</th><th>Status</th><th>Date Applied</th>
+      </tr>
+    </thead>
+    <tbody id="job-table"></tbody>
+  </table>
+</div>
+
+<p class="updated">Data from a real CDL-A job search, Millsap TX, March–April 2026</p>
+
+<!-- ── Chat FAB ── -->
+<button class="chat-fab" id="chat-toggle" aria-label="Open AI assistant">
+  🤖 Ask AI
+</button>
+
+<!-- ── Chat Panel ── -->
+<div class="chat-panel" id="chat-panel" role="dialog" aria-label="AI assistant">
+  <div class="chat-header">
+    <div class="chat-header-title">
+      <span class="chat-header-dot"></span>
+      AI Assistant <span style="font-weight:400;color:var(--muted);font-size:0.8rem;">(demo)</span>
+    </div>
+    <button class="chat-close-btn" id="chat-close" aria-label="Close chat">✕</button>
+  </div>
+
+  <div class="chat-messages" id="chat-messages">
+    <div class="chat-msg assistant">
+      <div class="bubble">
+        This is a <strong>demo</strong> — the AI is disabled here.<br><br>
+        Download the project and self-host it with your own Anthropic API key to enable full AI chat: add jobs, update statuses, and ask questions in plain English.
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input-row">
+    <input
+      type="text"
+      id="chat-input"
+      placeholder="AI disabled in demo — click to learn more"
+      readonly
+      aria-label="AI chat disabled in demo"
+    />
+    <button id="chat-send" aria-label="Disabled in demo" onclick="showModal()">&#10148;</button>
+  </div>
+</div>
+
+<!-- ── Demo Modal ── -->
+<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-label="Download to enable AI">
+  <div class="modal">
+    <div class="modal-icon">🤖</div>
+    <h2>AI Chat — Demo Mode</h2>
+    <p>The AI assistant is disabled in this demo. To enable it, self-host the app with your own <strong>Anthropic API key</strong>.</p>
+    <ol>
+      <li>Clone the repo from GitHub</li>
+      <li>Run <code>pip install -r requirements.txt</code></li>
+      <li>Copy <code>.env.example</code> → <code>.env</code> and add your key</li>
+      <li>Run <code>uvicorn main:app --reload</code></li>
+      <li>Open <code>http://localhost:8000</code></li>
+    </ol>
+    <p>Once running, the AI can view, add, update, and remove job entries in real time using natural language.</p>
+    <div class="modal-actions">
+      <a class="btn-primary" href="https://github.com/vfoster-repo/cdl-job-tracker-app" target="_blank" rel="noopener">View on GitHub</a>
+      <button class="btn-secondary" id="modal-close">Got it</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Static demo data ──────────────────────────────────────────────────────────
+  const JOBS = [
+    { id:"ryder-millsap",           company:"Ryder",                          title:"Class A CDL Regional Flatbed Driver",              location:"Millsap, TX",      status:"Applied",        date:"2026-03-25" },
+    { id:"luckys-ready-mix",        company:"Lucky's Ready Mix",              title:"Experienced Ready Mix Driver — Concrete Mixer",     location:"Cresson, TX",      status:"Applied",        date:"2026-03-26" },
+    { id:"j7-ready-mix",            company:"J7 Ready Mix, LLC",              title:"CDL Mixer Driver — Concrete / Ready Mix",           location:"Cresson, TX",      status:"Applied",        date:"2026-03-25" },
+    { id:"mayer-azle",              company:"MAYER",                          title:"Class A CDL Driver — Bulk Soil Delivery",           location:"Azle, TX",         status:"Applied",        date:"2026-03-25" },
+    { id:"cd-hartnett",             company:"The C.D. Hartnett Company",      title:"Class A Delivery Driver — Grocery Distribution",    location:"Weatherford, TX",  status:"Applied",        date:"2026-03-25" },
+    { id:"carpenter-milk-services", company:"Carpenter Milk Services (CMS)",  title:"CDL Driver — Milk Tanker, Home Daily",              location:"Stephenville, TX", status:"Applied",        date:"2026-03-25" },
+    { id:"penske-weatherford-job",  company:"Penske Logistics",               title:"Truck Driver — Local Class A Floater",              location:"Weatherford, TX",  status:"Applied",        date:"2026-03-25" },
+    { id:"hirschbach",              company:"Hirschbach Motor Lines",          title:"CA-TX Expedited Company Driver",                    location:"Aledo, TX",        status:"Call Recruiter", date:null },
+    { id:"geodynamics-millsap",     company:"GEODynamics",                    title:"CDL Hazmat Driver / Warehouse",                     location:"Millsap, TX",      status:"Applied",        date:"2026-03-09" },
+    { id:"kenan-advantage-group",   company:"Kenan Advantage Group (KAG)",    title:"CDL-A Local Tanker Driver",                        location:"Weatherford, TX",  status:"Call Recruiter", date:null },
+    { id:"groendyke-transport",     company:"Groendyke Transport",            title:"Local CDL-A Tanker Driver",                         location:"Fort Worth, TX",   status:"Applied",        date:"2026-03-20" },
+    { id:"new-tex-trucking",        company:"New Tex Trucking",               title:"Class A CDL Truck Driver — Water Hauling",          location:"Cresson, TX",      status:"Applied",        date:"2026-03-20" },
+    { id:"western-dairy-transport", company:"Western Dairy Transport",        title:"CDL-A Local Driver — Milk/Dairy Tanker",            location:"Local (TX)",       status:"Rejected",       date:"2026-03-13" },
+    { id:"penske-mineral-wells-job",company:"Penske Logistics",               title:"CDL-A Local Driver — Flatbed / Forklift",           location:"Mineral Wells, TX",status:"Rejected",       date:"2026-03-09" },
+    { id:"hampel-oil",              company:"Hampel Oil Distributors",        title:"CDL Delivery Driver — Fuel & Oil Lubricant",        location:"Cresson, TX",      status:"Rejected",       date:"2026-03-18" },
+    { id:"texas-transeastern-inc-tte",company:"Texas TransEastern Inc. (TTE)",title:"CDL A Company Tanker Local Home Daily",             location:"Fort Worth, TX",   status:"Rejected",       date:"2026-03-20" },
+    { id:"core48-transport-llc",    company:"CORE48 Transport, LLC",          title:"CDL-A Regional Tanker Truck Driver",                location:"Weatherford, TX",  status:"Rejected",       date:null },
+    { id:"schlumberger-slb",        company:"Schlumberger (SLB)",             title:"Local HazMat CDL Driver — Chemical Delivery",       location:"Weatherford, OK",  status:"Rejected",       date:null },
+    { id:"penn-tank-lines",         company:"Penn Tank Lines",                title:"Local CDL-A Fuel Tanker — Owner Operator",          location:"Local (TX)",       status:"Rejected",       date:null },
+  ];
+
+  // ── Helpers ───────────────────────────────────────────────────────────────────
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────────
+  const STATUS_ORDER = ['Interview','Call Recruiter','Applied','Not Applied','Rejected'];
+  let activeFilter = 'all';
+
+  function renderStats() {
+    const counts = { total: JOBS.length, Interview:0, 'Call Recruiter':0, Applied:0, Rejected:0, 'Not Applied':0 };
+    JOBS.forEach(j => { if (j.status in counts) counts[j.status]++; });
+    document.getElementById('stat-total').textContent          = counts.total;
+    document.getElementById('stat-interview').textContent      = counts.Interview;
+    document.getElementById('stat-call-recruiter').textContent = counts['Call Recruiter'];
+    document.getElementById('stat-applied').textContent        = counts.Applied;
+    document.getElementById('stat-rejected').textContent       = counts.Rejected;
+    document.getElementById('stat-not').textContent            = counts['Not Applied'];
+  }
+
+  function applyFilter() {
+    const filtered = activeFilter === 'all' ? [...JOBS] : JOBS.filter(j => j.status === activeFilter);
+    filtered.sort((a,b) => {
+      const oa = STATUS_ORDER.indexOf(a.status), ob = STATUS_ORDER.indexOf(b.status);
+      if (oa !== ob) return oa - ob;
+      if (a.date && b.date) return b.date.localeCompare(a.date);
+      if (a.date) return -1;
+      if (b.date) return 1;
+      return 0;
+    });
+
+    const tbody = document.getElementById('job-table');
+    tbody.innerHTML = '';
+    filtered.forEach((job, i) => {
+      const statusClass = job.status.toLowerCase().replace(/\s+/g,'-');
+      const tr = document.createElement('tr');
+
+      const n = document.createElement('td'); n.textContent = String(i+1);
+      const c = document.createElement('td');
+      const cn = document.createElement('div'); cn.className='company-name'; cn.textContent=job.company;
+      const ct = document.createElement('div'); ct.className='job-title';    ct.textContent=job.title;
+      c.append(cn,ct);
+      const l = document.createElement('td'); l.className='location';  l.textContent=job.location;
+      const s = document.createElement('td');
+      const b = document.createElement('span'); b.className='badge badge-'+statusClass; b.textContent=job.status;
+      s.appendChild(b);
+      const d = document.createElement('td'); d.className='date-cell'; d.textContent=fmtDate(job.date);
+
+      tr.append(n,c,l,s,d);
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      applyFilter();
+    });
+  });
+
+  // ── Chat panel toggle ─────────────────────────────────────────────────────────
+  const chatPanel  = document.getElementById('chat-panel');
+  const chatToggle = document.getElementById('chat-toggle');
+  const chatClose  = document.getElementById('chat-close');
+
+  chatToggle.addEventListener('click', () => {
+    chatPanel.classList.add('open');
+    chatToggle.style.display = 'none';
+  });
+
+  chatClose.addEventListener('click', () => {
+    chatPanel.classList.remove('open');
+    chatToggle.style.display = '';
+  });
+
+  // Clicking input opens modal
+  document.getElementById('chat-input').addEventListener('click', showModal);
+
+  // ── Modal ─────────────────────────────────────────────────────────────────────
+  function showModal() {
+    document.getElementById('modal-overlay').classList.add('visible');
+  }
+
+  document.getElementById('modal-close').addEventListener('click', () => {
+    document.getElementById('modal-overlay').classList.remove('visible');
+  });
+
+  document.getElementById('modal-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-overlay')) {
+      document.getElementById('modal-overlay').classList.remove('visible');
+    }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('modal-overlay').classList.remove('visible');
+  });
+
+  // ── Boot ──────────────────────────────────────────────────────────────────────
+  renderStats();
+  applyFilter();
+</script>
+</body>
+</html>

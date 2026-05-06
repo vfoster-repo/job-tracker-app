@@ -1,0 +1,195 @@
+{
+  "lastUpdated": "2026-05-06",
+  "jobs": [
+    {
+      "id": "ryder-millsap",
+      "company": "Ryder",
+      "title": "Class A CDL Regional Flatbed Driver",
+      "location": "Millsap, TX",
+      "status": "Applied",
+      "date": "2026-03-25",
+      "payRange": "$1,450+/wk",
+      "notes": "Dispatches from Millsap TX — no commute. Flatbed + Moffett forklift. $0.665/mile + $21.79/stop. Recruiter Chelsey (904) 932-0143, text 'Millsap Regional'."
+    },
+    {
+      "id": "luckys-ready-mix",
+      "company": "Lucky's Ready Mix",
+      "title": "Experienced Ready Mix Driver — Concrete Mixer",
+      "location": "Cresson, TX",
+      "status": "Applied",
+      "date": "2026-03-26",
+      "payRange": "$23.25–27/hr DOE",
+      "notes": "Up to 70 hrs/week. In-person interview preferred."
+    },
+    {
+      "id": "j7-ready-mix",
+      "company": "J7 Ready Mix, LLC",
+      "title": "CDL Mixer Driver — Concrete / Ready Mix",
+      "location": "Cresson, TX",
+      "status": "Applied",
+      "date": "2026-03-25",
+      "payRange": "From $23/hr",
+      "notes": "New plant opening in Cresson. 40 hrs/week guaranteed."
+    },
+    {
+      "id": "mayer-azle",
+      "company": "MAYER",
+      "title": "Class A CDL Driver — Bulk Soil Delivery (Flatbed / Dump)",
+      "location": "Azle, TX",
+      "status": "Applied",
+      "date": "2026-03-25",
+      "payRange": "$23–25/hr",
+      "notes": "Bulk soil delivery, flatbed/dump. Moffett required. Some regional trips."
+    },
+    {
+      "id": "cd-hartnett",
+      "company": "The C.D. Hartnett Company",
+      "title": "Class A Delivery Driver — Grocery Distribution",
+      "location": "Weatherford, TX",
+      "status": "Applied",
+      "date": "2026-03-25",
+      "payRange": "$1,300–1,500+/wk",
+      "notes": "Grocery distribution. Midnight–3am dispatch. 1–3 nights/week out of town. $3,000 sign-on bonus."
+    },
+    {
+      "id": "carpenter-milk-services",
+      "company": "Carpenter Milk Services (CMS)",
+      "title": "CDL Driver — Milk Tanker, Home Daily",
+      "location": "Stephenville, TX",
+      "status": "Applied",
+      "date": "2026-03-25",
+      "payRange": "$165–330/day (load-based)",
+      "notes": "Contact Curry Hooks (254) 485-7925."
+    },
+    {
+      "id": "penske-weatherford-job",
+      "company": "Penske Logistics",
+      "title": "Truck Driver — Local Class A Floater",
+      "location": "Weatherford, TX",
+      "status": "Applied",
+      "date": "2026-03-25",
+      "payRange": "$24.75/hr",
+      "notes": "192 Cartwright Park Rd, Weatherford TX. Referred by Mineral Wells recruiter. Req ID 2601847."
+    },
+    {
+      "id": "hirschbach",
+      "company": "Hirschbach Motor Lines",
+      "title": "CA-TX Expedited Company Driver",
+      "location": "Aledo, TX",
+      "status": "Call Recruiter",
+      "date": null,
+      "payRange": "$260–280/day",
+      "notes": "First on waiting list. Recruiter Lauren (402) 404-2433."
+    },
+    {
+      "id": "geodynamics-millsap",
+      "company": "GEODynamics",
+      "title": "CDL Hazmat Driver / Warehouse",
+      "location": "Millsap, TX",
+      "status": "Applied",
+      "date": "2026-03-09",
+      "payRange": "",
+      "notes": "Hazmat endorsement required. Local to Millsap."
+    },
+    {
+      "id": "kenan-advantage-group",
+      "company": "Kenan Advantage Group (KAG)",
+      "title": "CDL-A Local Tanker Driver",
+      "location": "Weatherford, TX",
+      "status": "Call Recruiter",
+      "date": null,
+      "payRange": "",
+      "notes": "Local tanker. Need to call recruiter to discuss opening."
+    },
+    {
+      "id": "groendyke-transport",
+      "company": "Groendyke Transport",
+      "title": "Local CDL-A Tanker Driver",
+      "location": "Fort Worth, TX",
+      "status": "Applied",
+      "date": "2026-03-20",
+      "payRange": "",
+      "notes": ""
+    },
+    {
+      "id": "new-tex-trucking",
+      "company": "New Tex Trucking",
+      "title": "Class A CDL Truck Driver — Water Hauling",
+      "location": "Cresson, TX",
+      "status": "Applied",
+      "date": "2026-03-20",
+      "payRange": "",
+      "notes": "Tanker endorsement required."
+    },
+    {
+      "id": "western-dairy-transport",
+      "company": "Western Dairy Transport",
+      "title": "CDL-A Local Driver — Milk/Dairy Tanker",
+      "location": "Local (TX)",
+      "status": "Rejected",
+      "date": "2026-03-13",
+      "payRange": "$22/hr",
+      "notes": "$22/hr offer declined — below $80K target, no OT pay."
+    },
+    {
+      "id": "penske-mineral-wells-job",
+      "company": "Penske Logistics",
+      "title": "CDL-A Local Driver — Flatbed / Forklift",
+      "location": "Mineral Wells, TX",
+      "status": "Rejected",
+      "date": "2026-03-09",
+      "payRange": "",
+      "notes": "Referred to Weatherford location instead."
+    },
+    {
+      "id": "hampel-oil",
+      "company": "Hampel Oil Distributors",
+      "title": "CDL Delivery Driver — Fuel & Oil Lubricant",
+      "location": "Cresson, TX",
+      "status": "Rejected",
+      "date": "2026-03-18",
+      "payRange": "",
+      "notes": ""
+    },
+    {
+      "id": "texas-transeastern-inc-tte",
+      "company": "Texas TransEastern Inc. (TTE)",
+      "title": "CDL A Company Tanker Local Home Daily",
+      "location": "Fort Worth, TX",
+      "status": "Rejected",
+      "date": "2026-03-20",
+      "payRange": "",
+      "notes": ""
+    },
+    {
+      "id": "core48-transport-llc",
+      "company": "CORE48 Transport, LLC",
+      "title": "CDL-A Regional Tanker Truck Driver",
+      "location": "Weatherford, TX",
+      "status": "Rejected",
+      "date": null,
+      "payRange": "",
+      "notes": ""
+    },
+    {
+      "id": "schlumberger-slb",
+      "company": "Schlumberger (SLB)",
+      "title": "Local HazMat CDL Driver — Chemical Delivery",
+      "location": "Weatherford, OK",
+      "status": "Rejected",
+      "date": null,
+      "payRange": "",
+      "notes": "Location in Oklahoma — too far."
+    },
+    {
+      "id": "penn-tank-lines",
+      "company": "Penn Tank Lines",
+      "title": "Local CDL-A Fuel Tanker — Owner Operator",
+      "location": "Local (TX)",
+      "status": "Rejected",
+      "date": null,
+      "payRange": "",
+      "notes": "Owner operator only — not company driver."
+    }
+  ]
+}
